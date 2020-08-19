@@ -457,7 +457,16 @@ zip -q -r9 check_person_tracking_status.zip check_person_tracking_status.py
 zip -q -r9 start_text_detection.zip start_text_detection.py
 zip -q -r9 check_text_detection_status.zip check_text_detection_status.py
 
-
+# ------------------------------------------------------------------------------"
+# test operators
+# ------------------------------------------------------------------------------"
+echo "Building test operator"
+cd "$source_dir/operators/testoperator" || exit 1
+[ -e dist ] && rm -r dist
+mkdir -p dist
+zip -q dist/testoperator.zip testoperator.py
+cp "./dist/testoperator.zip" "$dist_dir/testoperator.zip"
+rm -rf ./dist
 # remove this when service is GA
 
 [ -e dist ] && rm -r dist
