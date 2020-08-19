@@ -14,7 +14,7 @@ dataplane_bucket = os.environ['DataplaneBucket']
 s3 = boto3.client('s3')
 
 # These names are the lowercase version of OPERATOR_NAME defined in /source/operators/operator-library.yaml
-supported_operators = ["textdetection", "mediainfo", "transcribe", "translate", "genericdatalookup", "labeldetection", "celebrityrecognition", "facesearch", "contentmoderation", "facedetection", "key_phrases", "entities", "key_phrases", "shotdetection", "technicalcuedetection"]
+supported_operators = ["textdetection", "mediainfo", "transcribe", "translate", "genericdatalookup", "labeldetection", "celebrityrecognition", "facesearch", "contentmoderation", "facedetection", "key_phrases", "entities", "key_phrases", "shotdetection", "technicalcuedetection", "testoperator"]
 
 
 def normalize_confidence(confidence_value):
@@ -894,6 +894,8 @@ def lambda_handler(event, context):
                         if operator == "contentmoderation":
                             process_content_moderation(asset_id, workflow, metadata["Results"])
                         if operator == "facedetection":
+                            process_face_detection(asset_id, workflow, metadata["Results"])
+                        if operator == "testoperator":
                             process_face_detection(asset_id, workflow, metadata["Results"])
                         if operator == "facesearch":
                             process_face_search(asset_id, workflow, metadata["Results"])

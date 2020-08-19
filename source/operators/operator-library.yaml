@@ -471,47 +471,6 @@ Resources:
                 Resource: !Ref "snsRekognitionTopic"
                 Effect: "Allow"
 
-  testoperatorRole:
-    Type: "AWS::IAM::Role"
-    Properties:
-      ManagedPolicyArns:
-        # TODO: Security - Scope this down
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-        - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Action: "sts:AssumeRole"
-            Effect: "Allow"
-            Principal:
-              Service: "lambda.amazonaws.com"
-      Policies:
-        - PolicyName: "testoperatorAllowS3"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Action:
-                  - "s3:GetObject"
-                  - "s3:PutObject"
-                Resource: !Sub "arn:aws:s3:::${DataPlaneBucket}/*"
-                Effect: "Allow"
-              - Action:
-                  - "s3:ListBucket"
-                Resource: !Sub "arn:aws:s3:::${DataPlaneBucket}"
-                Effect: "Allow"
-        - PolicyName: "testoperatorPolicy"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              # TODO: Security - Scope this down
-              - Action:
-                  - iam:PassRole
-                Resource: "*"
-                Effect: "Allow"
-              - Action: "lambda:InvokeFunction"
-                Resource: !Ref DataPlaneHandlerArn
-                Effect: "Allow"
-
   StepFunctionRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -561,7 +520,6 @@ Resources:
                   - !GetAtt TranslateFunction.Arn
                   - !GetAtt StartPollyFunction.Arn
                   - !GetAtt CheckPollyFunction.Arn
-                  - !GetAtt testoperator.Arn
                 Effect: "Allow"
 
   # Lambda functions
@@ -995,7 +953,7 @@ Resources:
       Handler: "testoperator.lambda_handler"
       Layers:
         - !Ref MediaInsightsEnginePython37Layer
-      Role: !GetAtt "testoperatorRole.Arn"
+      Role: !GetAtt "rekognitionRole.Arn"
       Code:
         S3Bucket: !FindInMap ["SourceCode", "General", "S3Bucket"]
         S3Key:
@@ -1011,6 +969,8 @@ Resources:
       MemorySize: 256
       Environment:
         Variables:
+          REKOGNITION_SNS_TOPIC_ARN: !Ref "snsRekognitionTopic"
+          REKOGNITION_ROLE_ARN: !GetAtt "rekognitionRole.Arn"
           OPERATOR_NAME: "testoperator"
           DataplaneEndpoint: !Ref "DataPlaneEndpoint"
           DATAPLANE_BUCKET: !Ref "DataPlaneBucket"
@@ -2066,11 +2026,11 @@ Outputs:
       Name: !Join [":", [!Ref "AWS::StackName", ComprehendEntities]]
 
   # test operators
-  TestOperator:
+  TestOperatorImage:
     Description: "test operator"
     Value: !GetAtt testoperatorOperationImage.Name
     Export:
-      Name: !Join [":", [!Ref "AWS::StackName", TestOperator]]
+      Name: !Join [":", [!Ref "AWS::StackName", TestOperatorImage]]
 
   # Rekognition video
   shotDetection:

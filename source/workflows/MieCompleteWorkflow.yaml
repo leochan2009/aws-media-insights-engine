@@ -55,7 +55,7 @@ Resources:
         - Fn::ImportValue:
             Fn::Sub: "${OperatorLibraryStack}:Mediaconvert"
         - Fn::ImportValue:
-            Fn::Sub: "${OperatorLibraryStack}:TestOperator"
+            Fn::Sub: "${OperatorLibraryStack}:TestOperatorImage"
 
   defaultAudioStage:
     Type: Custom::CustomResource
